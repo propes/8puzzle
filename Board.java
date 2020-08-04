@@ -75,9 +75,10 @@ public class Board {
                 { 1, 0 }
         };
         for (int[] offset : offsets) {
-            if (rc[0] + offset[0] < 0 || rc[1] + offset[1] < 0) continue;
+            int[] rcSwap = { rc[0] + offset[0], rc[1] + offset[1] };
+            if (isOutOfBounds(rcSwap)) continue;
             int[][] tilesCopy = copyTiles(tiles);
-            swapTiles(tilesCopy, rc, new int[] { rc[0] + offset[0], rc[1] + offset[1] });
+            swapTiles(tilesCopy, rc, rcSwap);
             neighbours.enqueue(new Board(tilesCopy));
         }
 
@@ -164,6 +165,10 @@ public class Board {
             }
         }
         throw new NoSuchElementException("Board does not contain a blank tile");
+    }
+
+    private boolean isOutOfBounds(int[] rc) {
+        return rc[0] < 0 || rc[0] == dimension() || rc[1] < 0 || rc[1] == dimension();
     }
 
     public static void main(String[] args) {
@@ -322,6 +327,27 @@ public class Board {
 
         Assert.isTrue(board.twin().equals(board2),
                       "twin board should have first two tiles swapped");
+
+        tiles = new int[][] {
+                { 1, 2, 0, },
+                { 3, 4, 5, },
+                { 6, 7, 8, }
+        };
+        board = new Board(tiles);
+        iter = board.neighbors().iterator();
+
+        iter.next();
+        next = iter.next();
+
+        tiles2 = new int[][] {
+                { 1, 2, 5, },
+                { 3, 4, 0, },
+                { 6, 7, 8, }
+        };
+        board2 = new Board(tiles2);
+
+        Assert.isTrue(next.equals(board2),
+                      "2nd neighbor should be as expected given blank tile is in the top right corner");
 
         if (Assert.allTestsPassed())
             StdOut.println("All tested passed.");
