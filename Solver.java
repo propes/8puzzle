@@ -8,11 +8,11 @@ public class Solver {
     public Solver(Board initial) {
         if (initial == null) throw new IllegalArgumentException("Initial board cannot be null");
 
-        solve(initial);
+        solve(initial, SearchMode.Manhattan);
     }
 
     public boolean isSolvable() {
-        return true;
+        return goal != null;
     }
 
     public int moves() {
@@ -23,20 +23,28 @@ public class Solver {
         return goal == null ? null : goal.moves();
     }
 
-    private void solve(Board initial) {
+    private void solve(Board initial, SearchMode mode) {
         MinPQ<SearchNode> pq = new MinPQ<SearchNode>();
-        pq.insert(new SearchNode(initial, null, 0, SearchMode.Hamming));
+        MinPQ<SearchNode> pqTwin = new MinPQ<SearchNode>();
+        pq.insert(new SearchNode(initial, null, 0, mode));
+        pqTwin.insert(new SearchNode(initial.twin(), null, 0, mode));
         SearchNode node = pq.delMin();
+        SearchNode twinNode = pqTwin.delMin();
 
-        while (!node.isGoal()) {
+        while (!node.isGoal() && !twinNode.isGoal()) {
             for (SearchNode neighbor : node.neighbors()) {
                 pq.insert(neighbor);
             }
-
             node = pq.delMin();
+            if (node.isGoal()) break;
+
+            for (SearchNode neighbor : twinNode.neighbors()) {
+                pqTwin.insert(neighbor);
+            }
+            twinNode = pqTwin.delMin();
         }
 
-        goal = node;
+        goal = node.isGoal() ? node : null;
     }
 
     public static void main(String[] args) {
