@@ -24,7 +24,7 @@ public class Solver {
     }
 
     private void solve(Board initial) {
-        MinPQ<SearchNode> pq = new MinPQ<SearchNode>(new SearchNodeComparator());
+        MinPQ<SearchNode> pq = new MinPQ<SearchNode>();
         pq.insert(new SearchNode(initial, null, 0, SearchMode.Hamming));
         SearchNode node = pq.delMin();
 

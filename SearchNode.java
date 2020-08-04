@@ -1,7 +1,7 @@
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.Stack;
 
-public class SearchNode {
+public class SearchNode implements Comparable<SearchNode> {
     private final Board board;
     private final SearchNode prev;
     private final int moveCount;
@@ -24,10 +24,6 @@ public class SearchNode {
 
     public int moveCount() {
         return moveCount;
-    }
-
-    public int priority() {
-        return (mode == SearchMode.Manhattan ? board.manhattan() : board.hamming()) + moveCount;
     }
 
     public Iterable<SearchNode> neighbors() {
@@ -62,5 +58,13 @@ public class SearchNode {
             prevNode = prevNode.prev();
         }
         return false;
+    }
+
+    public int compareTo(SearchNode searchNode) {
+        return this.priority() - searchNode.priority();
+    }
+
+    private int priority() {
+        return (mode == SearchMode.Manhattan ? board.manhattan() : board.hamming()) + moveCount;
     }
 }
