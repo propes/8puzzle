@@ -7,12 +7,16 @@ import java.util.NoSuchElementException;
 
 public class Board {
     private final int[][] tiles;
+    private final int manhattan;
+    private final int hamming;
 
     public Board(int[][] tiles) {
         if (tiles.length != tiles[0].length) throw new IllegalArgumentException(
                 "Array must have an equal number of rows and columns.");
 
         this.tiles = tiles;
+        manhattan = calculateManhattan();
+        hamming = calculateHamming();
     }
 
     public String toString() {
@@ -35,28 +39,12 @@ public class Board {
     }
 
     public int hamming() {
-        int count = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (i == dimension() - 1 && j == dimension() - 1) break;
-                if (tiles[i][j] != rowColToNumber(i, j)) count++;
-            }
-        }
-        return count;
+        return hamming;
     }
 
     public int manhattan() {
-        int sum = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (tiles[i][j] == 0) continue;
-                sum += distanceFromGoalPosition(tiles[i][j], i, j);
-            }
-        }
-
-        return sum;
+        return manhattan;
     }
-
 
     public boolean isGoal() {
         for (int i = 0; i < dimension(); i++) {
@@ -113,6 +101,29 @@ public class Board {
         }
 
         throw new IndexOutOfBoundsException("Board does not contain non-blank tiles");
+    }
+
+    private int calculateHamming() {
+        int count = 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (i == dimension() - 1 && j == dimension() - 1) break;
+                if (tiles[i][j] != rowColToNumber(i, j)) count++;
+            }
+        }
+        return count;
+    }
+
+    private int calculateManhattan() {
+        int sum = 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (tiles[i][j] == 0) continue;
+                sum += distanceFromGoalPosition(tiles[i][j], i, j);
+            }
+        }
+
+        return sum;
     }
 
     private void swapTilesWithNext(int[][] tilesCopy, int[] rc) {
