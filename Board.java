@@ -87,15 +87,12 @@ public class Board {
 
     public Board twin() {
         int[][] tilesCopy = copyTiles(tiles);
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (tilesCopy[i][j] == 0) continue;
-                swapTilesWithNext(tilesCopy, new int[] { i, j });
-                return new Board(tilesCopy);
-            }
-        }
+        int[] rcFirst = { 0, 0 };
+        if (tilesCopy[0][0] == 0) rcFirst = nextNonBlankTile(tilesCopy, rcFirst);
+        int[] rcSecond = nextNonBlankTile(tilesCopy, rcFirst);
+        swapTiles(tilesCopy, rcFirst, rcSecond);
 
-        throw new IndexOutOfBoundsException("Board does not contain non-blank tiles");
+        return new Board(tilesCopy);
     }
 
     private void calculatePriorities() {
@@ -114,10 +111,14 @@ public class Board {
         isGoal = hamming == 0;
     }
 
-    private void swapTilesWithNext(int[][] tilesCopy, int[] rc) {
-        int pos = rowColToPosition(rc[0], rc[1]);
-        int[] rcNext = positionToRowCol(pos + 1);
-        swapTiles(tilesCopy, rc, rcNext);
+    private int[] nextNonBlankTile(int[][] tilesCopy, int[] rc) {
+        int pos = rowColToPosition(rc[0], rc[1]) + 1;
+        int[] rcNext = positionToRowCol(pos);
+        while (tilesCopy[rcNext[0]][rcNext[1]] == 0) {
+            pos++;
+            rcNext = positionToRowCol(pos);
+        }
+        return rcNext;
     }
 
     private int distanceFromGoalPosition(int number, int row, int col) {
@@ -312,23 +313,6 @@ public class Board {
                       "2nd neighbor should be as expected given blank tile is in the top left corner");
 
         tiles = new int[][] {
-                { 0, 1, 2, },
-                { 3, 4, 5, },
-                { 6, 7, 8, }
-        };
-        board = new Board(tiles);
-
-        tiles2 = new int[][] {
-                { 0, 2, 1, },
-                { 3, 4, 5, },
-                { 6, 7, 8, }
-        };
-        board2 = new Board(tiles2);
-
-        Assert.isTrue(board.twin().equals(board2),
-                      "twin board should have first two tiles swapped");
-
-        tiles = new int[][] {
                 { 1, 2, 0, },
                 { 3, 4, 5, },
                 { 6, 7, 8, }
@@ -348,6 +332,38 @@ public class Board {
 
         Assert.isTrue(next.equals(board2),
                       "2nd neighbor should be as expected given blank tile is in the top right corner");
+
+        tiles = new int[][] {
+                { 0, 1, 2, },
+                { 3, 4, 5, },
+                { 6, 7, 8, }
+        };
+        board = new Board(tiles);
+
+        tiles2 = new int[][] {
+                { 0, 2, 1, },
+                { 3, 4, 5, },
+                { 6, 7, 8, }
+        };
+        board2 = new Board(tiles2);
+
+        Assert.isTrue(board.twin().equals(board2),
+                      "twin board should have second and third tiles swapped");
+
+        tiles = new int[][] {
+                { 1, 0 },
+                { 2, 3 }
+        };
+        board = new Board(tiles);
+
+        tiles2 = new int[][] {
+                { 2, 0 },
+                { 1, 3 }
+        };
+        board2 = new Board(tiles2);
+
+        Assert.isTrue(board.twin().equals(board2),
+                      "twin board should have first and third tiles swapped");
 
         if (Assert.allTestsPassed())
             StdOut.println("All tested passed.");
