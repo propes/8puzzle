@@ -7,16 +7,16 @@ import java.util.NoSuchElementException;
 
 public class Board {
     private final int[][] tiles;
-    private final int manhattan;
-    private final int hamming;
+    private int manhattan;
+    private int hamming;
+    private boolean isGoal;
 
     public Board(int[][] tiles) {
         if (tiles.length != tiles[0].length) throw new IllegalArgumentException(
                 "Array must have an equal number of rows and columns.");
 
-        this.tiles = tiles;
-        manhattan = calculateManhattan();
-        hamming = calculateHamming();
+        this.tiles = copyTiles(tiles);
+        calculatePriorities();
     }
 
     public String toString() {
@@ -47,13 +47,7 @@ public class Board {
     }
 
     public boolean isGoal() {
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (i == dimension() - 1 && j == dimension() - 1) break;
-                if (tiles[i][j] != rowColToNumber(i, j)) return false;
-            }
-        }
-        return true;
+        return isGoal;
     }
 
     public boolean equals(Object y) {
@@ -82,7 +76,7 @@ public class Board {
         };
         for (int[] offset : offsets) {
             if (rc[0] + offset[0] < 0 || rc[1] + offset[1] < 0) continue;
-            int[][] tilesCopy = copyTiles();
+            int[][] tilesCopy = copyTiles(tiles);
             swapTiles(tilesCopy, rc, new int[] { rc[0] + offset[0], rc[1] + offset[1] });
             neighbours.enqueue(new Board(tilesCopy));
         }
@@ -91,7 +85,7 @@ public class Board {
     }
 
     public Board twin() {
-        int[][] tilesCopy = copyTiles();
+        int[][] tilesCopy = copyTiles(tiles);
         for (int i = 0; i < dimension(); i++) {
             for (int j = 0; j < dimension(); j++) {
                 if (tilesCopy[i][j] == 0) continue;
@@ -103,27 +97,20 @@ public class Board {
         throw new IndexOutOfBoundsException("Board does not contain non-blank tiles");
     }
 
-    private int calculateHamming() {
-        int count = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (i == dimension() - 1 && j == dimension() - 1) break;
-                if (tiles[i][j] != rowColToNumber(i, j)) count++;
-            }
-        }
-        return count;
-    }
-
-    private int calculateManhattan() {
-        int sum = 0;
+    private void calculatePriorities() {
+        int hammingCount = 0;
+        int manhattanSum = 0;
         for (int i = 0; i < dimension(); i++) {
             for (int j = 0; j < dimension(); j++) {
                 if (tiles[i][j] == 0) continue;
-                sum += distanceFromGoalPosition(tiles[i][j], i, j);
+                if (tiles[i][j] != rowColToNumber(i, j)) hammingCount++;
+                manhattanSum += distanceFromGoalPosition(tiles[i][j], i, j);
             }
         }
 
-        return sum;
+        hamming = hammingCount;
+        manhattan = manhattanSum;
+        isGoal = hamming == 0;
     }
 
     private void swapTilesWithNext(int[][] tilesCopy, int[] rc) {
@@ -159,11 +146,12 @@ public class Board {
         tilesCopy[rc2[0]][rc2[1]] = temp;
     }
 
-    private int[][] copyTiles() {
-        int[][] copy = new int[dimension()][dimension()];
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                copy[i][j] = tiles[i][j];
+    private int[][] copyTiles(int[][] original) {
+        int n = original.length;
+        int[][] copy = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                copy[i][j] = original[i][j];
             }
         }
         return copy;
