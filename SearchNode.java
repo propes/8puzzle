@@ -52,12 +52,7 @@ public class SearchNode implements Comparable<SearchNode> {
     }
 
     private boolean containsBoard(Board someBoard) {
-        SearchNode prevNode = prev;
-        while (prevNode != null) {
-            if (prevNode.board().equals(someBoard)) return true;
-            prevNode = prevNode.prev();
-        }
-        return false;
+        return prev != null && prev.board().equals(someBoard);
     }
 
     public int compareTo(SearchNode searchNode) {
