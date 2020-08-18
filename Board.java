@@ -60,10 +60,6 @@ public class Board {
         return Arrays.deepEquals(tiles, board.tiles);
     }
 
-    public int hashCode() {
-        throw new UnsupportedOperationException();
-    }
-
     public Iterable<Board> neighbors() {
         Queue<Board> neighbours = new Queue<>();
         int[] rc = findBlankTile();
